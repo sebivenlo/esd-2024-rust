@@ -1,6 +1,6 @@
 FROM rust:1.82-slim-bullseye
 
-RUN apt update && apt install --no-install-recommends -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
     curl \
     libssl-dev \
