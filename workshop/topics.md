@@ -1,0 +1,12 @@
+- Common Programming Concepts – refresher // short intro
+- Immutability & Everything non-nullable by default
+- Ownership & Borrow Checker
+  - Macros (simple explanation, explain while printing, C++ Macros, but without drawbacks/operating on AST level)
+- Lifetimes
+- Box
+- Structs & Option Struct
+- Enums & Pattern Matching
+- (Smart Pointer)
+- (Error Handling)
+- (Generics=Traits)
+- ((Async Rust))
