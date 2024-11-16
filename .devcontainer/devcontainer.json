@@ -1,0 +1,20 @@
+{
+    "name": "Rust Dev Container (Slim Bullseye) - esd rust workshop",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "tamasfe.even-better-toml"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "rust-analyzer.checkOnSave.command": "clippy",
+                "rust-analyzer.cargo.autoreload": true
+            }
+        }
+    },
+    "postCreateCommand": "echo 'Rust dev container is ready.'"
+}
