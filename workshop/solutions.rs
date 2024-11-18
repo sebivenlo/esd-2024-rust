@@ -4,7 +4,7 @@ pub fn main() {
     //TODO add to exercise: "Create a vec of books"
     let mut books:Vec<Book> = vec![];
     
-    // From Exercise: Structs & Option Struct
+    // From Exercise 1.1: Structs & Option Struct
     let book1 = Book {
         title: String::from("1984"),
         author: String::from("George Orwell"),
@@ -19,6 +19,12 @@ pub fn main() {
     };
     println!("{:?}", book1);
     println!("{:?}", book2);
+
+    // From Exercise 6.2: Error Handling
+    match search_book(&mut books, "9780060850524".to_string()) {
+        Ok(book) => { println!("Found book: {:?}", book); }
+        Err(e) => { println!("Error: {:?}", e); }
+    }
 }
 
 // 1. Structs & Option Struct
@@ -85,11 +91,18 @@ fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
     }
 }
 
+// 6. Error Handling
+// 6.1 Write a function that searches for a book by its isbn, but doesn't take ownership of it.
+//     Return a Result of a Book or an error message, depending on if the book was found.
+// 6.2 Call the function and use pattern matching to handle the possible results.
+fn search_book(books: &mut Vec<Book>, isbn: String) -> Result<&Book, Box<dyn Error>> {
+    //panic!("The Library burned down");
+    books.iter().find(|&book| book.isbn == isbn).ok_or_else(|| "Book not found".into())
+}
+
 // Box
 
 // (Smart Pointer)
-
-// (Error Handling)
 
 // (Generics=Traits)
 
