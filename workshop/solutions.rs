@@ -1,6 +1,9 @@
 // Library Management System Exercises Solutions
 
 pub fn main() {
+    //TODO add to exercise: "Create a vec of books"
+    let mut books:Vec<Book> = vec![];
+    
     // From Exercise: Structs & Option Struct
     let book1 = Book {
         title: String::from("1984"),
@@ -71,8 +74,6 @@ fn handle_action(action: LibraryAction) {
     }
 }
 
-// Macros
-
 // Lifetimes
 
 // Box
@@ -82,5 +83,13 @@ fn handle_action(action: LibraryAction) {
 // (Error Handling)
 
 // (Generics=Traits)
+
+// (Macros)
+// Write a macro to log library actions, use it to log actions.
+// macro_rules! log_action {
+//     ($msg:expr) => {
+//         println!("LOG: {}", $msg)
+//     };
+// }
 
 // ((Async Rust))
