@@ -74,7 +74,16 @@ fn handle_action(action: LibraryAction) {
     }
 }
 
-// Lifetimes
+// 5. Lifetimes
+// Create a function, which takes two references to Book as parameters and returns a reference to the book with the longest title.
+// TODO further explanation...
+fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
+    if x.title.len() > y.title.len() {
+        x
+    } else {
+        y
+    }
+}
 
 // Box
 
