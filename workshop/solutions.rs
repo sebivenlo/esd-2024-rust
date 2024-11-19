@@ -78,7 +78,7 @@ pub fn main() {
     user_input(&mut library);
 }
 
-// For Exercise 3.3: Enums & Pattern Matching
+// For Exercise 4.3: Enums & Pattern Matching
 // A provided function handling command line input for interaction with the program.
 // Takes a mutable Vector of Book as a parameter.
 // Uses LibraryAction enum and handle_action function from Exercise 4 to execute functionality.
@@ -249,9 +249,13 @@ impl Library {
     }
 }
 
-// 6. Lifetimes
-// Create a function, which takes two references to Book as parameters and returns a reference to the book with the longest title.
-// TODO further explanation...
+// 6. Lifetimes & Borrow Checker
+// 6.1 Write a function, which takes two references to Book as parameters and returns a reference to the book with the longer title.
+// 6.2 Implement function 'lifetime_demo'
+//     1. Move a book out of the library into a new variable. Declare a variable that will store the book with the longer title later on.
+//     2. Open a new Scope and create a new instance of Book and compare it with the book taken out of the library before the scope. Print the Book with the longer title inside the scope.
+//     3. After the Scope, try to first print the book with the longer title and after that the book taken out of the library.
+//     4. Run the Program, what happens? TODO
 
 fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
     if x.title.len() > y.title.len() {
@@ -259,6 +263,23 @@ fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
     } else {
         y
     }
+}
+
+fn lifetime_demo(library: &mut Library) {
+    let taken_book = library.take_book(&ISBN::new("9780451524935")).unwrap();
+    let longest_title_book;
+    {
+        let book3 = Book {
+            title: Title::new("Book3"),
+            author: Author::new("Author3"),
+            isbn: ISBN::new("ISB3"),
+            publication_year: Some(PublicationYear(3333))
+        };
+        longest_title_book = longest_title(&taken_book, &book3);
+        println!("Book with longer title: {:?}", longest_title_book);
+    }
+    //println!("{:?}", longest_title_book);
+    println!("Taken Book: {:?}", taken_book);
 }
 
 // 7. Error Handling
