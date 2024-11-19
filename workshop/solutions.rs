@@ -4,22 +4,51 @@ use std::io;
 use std::rc::Rc;
 use rand::seq::SliceRandom;
 
+// Provided macro for creating custom types.
+// - Defines a struct with the name of the custom type ($name), encapsulating another type ($ty).
+// - Implements a constructor for the struct, accepting a value convertible into the encapsulated type ($ty).
+macro_rules! impl_type {
+    ($name:ident, $ty:ty) => {
+        #[derive(Debug, PartialEq, Eq, Clone)]
+        struct $name($ty);
+
+        impl $name {
+            pub fn new(value: impl Into<$ty>) -> $name {
+                $name(value.into())
+            }
+        }
+    };
+}
+
+// Provided calls, creating custom types for the fields of Book.
+impl_type!(Title, String); //Title is String
+impl_type!(Author, String); //Author is String
+impl_type!(ISBN, String); //ISBN is String
+impl_type!(PublicationYear, u16); //PublicationYear is u16
+
+// Provided implementation of 'len' for Title.
+impl Title {
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 pub fn main() {
     //TODO add to exercise: "Create a vec of books"
     let mut books:Vec<Book> = vec![];
     
     // From Exercise 1.1: Structs & Option Struct
     let book1 = Book {
-        title: String::from("1984"),
-        author: String::from("George Orwell"),
-        isbn: String::from("9780451524935"),
-        publication_year: Some(1961),
+        title: Title::new("1984"),
+        author: Author::new("George Orwell"),
+        isbn: ISBN::new("9780451524935"),
+        publication_year: Some(PublicationYear(1961)),
     };
     let book2 = Book {
-        title: String::from("Brave New World"),
-        author: String::from("Aldous Huxley"),
-        isbn: String::from("9780060850524"),
-        publication_year: Some(2006),
+        title: Title::new("Brave New World"),
+        author: Author::new("Aldous Huxley"),
+        isbn: ISBN::new("9780060850524"),
+        publication_year: Some(PublicationYear(2006)),
     };
     println!("{:?}", book1);
     println!("{:?}", book2);
@@ -28,7 +57,7 @@ pub fn main() {
     suggest_book(&books);
 
     // From Exercise 6.2: Error Handling
-    match search_book(&mut books, "9780060850524".to_string()) {
+    match search_book(&mut books, ISBN::new("9780060850524")) {
         Ok(book) => { println!("Found book: {:?}", book); }
         Err(e) => { println!("Error: {:?}", e); }
     }
@@ -75,10 +104,10 @@ pub fn user_input(books: &mut Vec<Book>) {
                 }
 
                 let year = match parts.get(3) {
-                    Some(year_str) => match year_str.trim().parse::<u32>() {
+                    Some(year_str) => match year_str.trim().parse::<u16>() {
                         Ok(year) => Some(year),
                         Err(_) => {
-                            println!("\nInvalid input! Year must be an integer.");
+                            println!("\nInvalid input! Year must be u16.");
                             continue;
                         }
                     },
@@ -86,17 +115,17 @@ pub fn user_input(books: &mut Vec<Book>) {
                 };
 
                 LibraryAction::AddBook(
-                    parts[0].trim().to_string(),
-                    parts[1].trim().to_string(),
-                    parts[2].trim().to_string(),
-                    year,
+                    Title::new(parts[0].trim().to_string()),
+                    Author::new(parts[1].trim().to_string()),
+                    ISBN::new(parts[2].trim().to_string()),
+                    year.map(|it| PublicationYear::new(it)),
                 )
             }
             "2" => {
                 println!("Enter ISBN of the book to take:");
                 let mut isbn = String::new();
                 io::stdin().read_line(&mut isbn).expect("Failed to read input");
-                LibraryAction::TakeBook(isbn.trim().to_string())
+                LibraryAction::TakeBook(ISBN::new(isbn.trim()))
             }
             "3" => LibraryAction::ListBooks,
             _ => {
@@ -111,13 +140,15 @@ pub fn user_input(books: &mut Vec<Book>) {
 
 // 1. Structs & Option Struct
 // 1.1 Create a 'Book' struct with fields for the title, author, ISBN and an optional publication year.
+//     To achieve better type safety thorugh enforcing stricter type checks, use the provided Types Title, Author, ISBN and PublicationYear defined at the beginning of the file.
+//     Hint: If you look at the impl_type(name, type) macro calls, you can see the wrapped types of each of the provided types.
 // 1.2 Create instances of 'Book' and print their details.
 #[derive(Debug)]
 struct Book {
-    title: String,
-    author: String,
-    isbn: String,
-    publication_year: Option<u32>,
+    title: Title,
+    author: Author,
+    isbn: ISBN,
+    publication_year: Option<PublicationYear>,
 }
 
 // 2. Ownership & Borrow Checker TODO
@@ -129,7 +160,7 @@ fn add_book(books: &mut Vec<Book>, book: Book) {
     books.push(book);
 }
 
-fn take_book(books: &mut Vec<Book>, isbn: &str) -> Option<Book> {
+fn take_book(books: &mut Vec<Book>, isbn: &ISBN) -> Option<Book> {
     let index = books.iter().position(|book| &book.isbn == isbn); //maybe provide
     if let Some(idx) = index {
         let removed_book = books.remove(idx);
@@ -144,14 +175,14 @@ fn list_books(books: &Vec<Book>) {
 }
 
 // 3. Enums & Pattern Matching
-// 3.1 Create an enum 'LibraryAction' with actions 'AddBook(String, String, String, Option<u32>)', 'TakeBook(String)' and 'ListBooks'.
+// 3.1 Create an enum 'LibraryAction' with actions 'AddBook(Title, Author, ISBN, Option<PublicationYear>)', 'TakeBook(ISBN)' and 'ListBooks'.
 // 3.2 Create a function 'handle_action'.
 //     Use a match statement to handle each LibraryAction, calling the methods you wrote in Task 3.
 // 3.3 Uncomment the 'user_input' function and its call in main()
 //     The function 'user_input' sets a variable to an action the user chooses and calls the function 'handle_action' with the chosen action.
 enum LibraryAction {
-    AddBook(String, String, String, Option<u32>),
-    TakeBook(String),
+    AddBook(Title, Author, ISBN, Option<PublicationYear>),
+    TakeBook(ISBN),
     ListBooks,
 }
 
@@ -166,10 +197,10 @@ fn handle_action(books: &mut Vec<Book>, action: LibraryAction) {
                 publication_year
             };
             add_book(books, book);
-            println!("Added Book: {}", title_clone);
+            println!("Added Book: {:?}", title_clone);
         },
         LibraryAction::TakeBook(isbn) => {
-            let removed_book = take_book(books, isbn);
+            let removed_book = take_book(books, &isbn);
             println!("Took Book: {:?}", removed_book);
         },
         LibraryAction::ListBooks => {
@@ -205,7 +236,7 @@ fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
 // 6.1 Write a function that searches for a book by its isbn, but doesn't take ownership of it.
 //     Return a Result of a Book or an error message, depending on if the book was found.
 // 6.2 Call the function and use pattern matching to handle the possible results.
-fn search_book(books: &mut Vec<Book>, isbn: String) -> Result<&Book, Box<dyn Error>> {
+fn search_book(books: &mut Vec<Book>, isbn: ISBN) -> Result<&Book, String> {
     //panic!("The Library burned down");
     books.iter().find(|&book| book.isbn == isbn).ok_or_else(|| "Book not found".into())
 }
