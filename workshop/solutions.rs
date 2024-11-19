@@ -1,5 +1,9 @@
 // Library Management System Exercises Solutions
 
+use std::io;
+use std::rc::Rc;
+use rand::seq::SliceRandom;
+
 pub fn main() {
     //TODO add to exercise: "Create a vec of books"
     let mut books:Vec<Book> = vec![];
@@ -20,17 +24,20 @@ pub fn main() {
     println!("{:?}", book1);
     println!("{:?}", book2);
 
+    // From Exercise 4.3: Crates
+    suggest_book(&books);
+
     // From Exercise 6.2: Error Handling
     match search_book(&mut books, "9780060850524".to_string()) {
         Ok(book) => { println!("Found book: {:?}", book); }
         Err(e) => { println!("Error: {:?}", e); }
     }
 
-    // From Exercise 4.3: Enums & Pattern matching
+    // From Exercise 3.3: Enums & Pattern matching
     user_input(&mut books);
 }
 
-// For Exercise 4.3: Enums & Pattern Matching
+// For Exercise 3.3: Enums & Pattern Matching
 // A provided function handling command line input for interaction with the program.
 // Takes a mutable Vector of Book as a parameter.
 // Uses LibraryAction enum and handle_action function from Exercise 4 to execute functionality.
@@ -113,16 +120,11 @@ struct Book {
     publication_year: Option<u32>,
 }
 
-// 2. Immutability & Everything non-nullable by default TODO
-// Create an immutable vector of books. Try to modify it (use push function) and compile. What happens?
-// Then make it mutable and add the books from Task 1 to the collection.
-
-
-// 3. Ownership & Borrow Checker
-// 3.1 Write a function add_book, that takes ownership of a book and adds it to a borrowed book collection.
-// 3.2 Write a function take_book, with which you can take a book out of a borrowed book collection by its ISBN.
+// 2. Ownership & Borrow Checker TODO
+// 2.1 Write a function add_book, that takes ownership of a book and adds it to a borrowed book collection.
+// 2.2 Write a function take_book, with which you can take a book out of a borrowed book collection by its ISBN.
 //     The function takes ownership of a book from the collection and returns it.
-// 3.3 Write a function list_books, that borrows a book collection and prints it.
+// 2.3 Write a function list_books, that borrows a book collection and prints it.
 fn add_book(books: &mut Vec<Book>, book: Book) {
     books.push(book);
 }
@@ -141,11 +143,11 @@ fn list_books(books: &Vec<Book>) {
     println!("Books: {:?}", books);
 }
 
-// 4. Enums & Pattern Matching
-// 4.1 Create an enum 'LibraryAction' with actions 'AddBook(String, String, String, Option<u32>)', 'TakeBook(String)' and 'ListBooks'.
-// 4.2 Create a function 'handle_action'.
+// 3. Enums & Pattern Matching
+// 3.1 Create an enum 'LibraryAction' with actions 'AddBook(String, String, String, Option<u32>)', 'TakeBook(String)' and 'ListBooks'.
+// 3.2 Create a function 'handle_action'.
 //     Use a match statement to handle each LibraryAction, calling the methods you wrote in Task 3.
-// 4.3 Uncomment the 'user_input' function and its call in main()
+// 3.3 Uncomment the 'user_input' function and its call in main()
 //     The function 'user_input' sets a variable to an action the user chooses and calls the function 'handle_action' with the chosen action.
 enum LibraryAction {
     AddBook(String, String, String, Option<u32>),
@@ -176,6 +178,18 @@ fn handle_action(books: &mut Vec<Book>, action: LibraryAction) {
     }
 }
 
+// 4. Crates
+// 4.1 Add to dependencies in Cargo.toml: rand = "0.8.5"
+//     and import rand::seq::SliceRandom
+// 4.2 Write a function 'suggest_book', that chooses a random book using 'books.choose(&mut rand::thread_rng())' and prints the result.
+fn suggest_book(books: &Vec<Book>) {
+    if let Some(book) = books.choose(&mut rand::thread_rng()) {
+        println!("Suggested Book: {:?}", book);
+    } else {
+        println!("No books available to suggest.");
+    }
+}
+
 // 5. Lifetimes
 // Create a function, which takes two references to Book as parameters and returns a reference to the book with the longest title.
 // TODO further explanation...
@@ -196,9 +210,10 @@ fn search_book(books: &mut Vec<Book>, isbn: String) -> Result<&Book, Box<dyn Err
     books.iter().find(|&book| book.isbn == isbn).ok_or_else(|| "Book not found".into())
 }
 
-// Box/Smart Pointer
+// 7. Smart Pointers
+// 7.1 Box
+// 7.2 Rc
 
-// Generics/Traits
 
 // (Macros)
 // Write a macro to log library actions, use it to log actions.
@@ -207,5 +222,3 @@ fn search_book(books: &mut Vec<Book>, isbn: String) -> Result<&Book, Box<dyn Err
 //         println!("LOG: {}", $msg)
 //     };
 // }
-
-// ((Async Rust))
