@@ -25,6 +25,81 @@ pub fn main() {
         Ok(book) => { println!("Found book: {:?}", book); }
         Err(e) => { println!("Error: {:?}", e); }
     }
+
+    // From Exercise 4.3: Enums & Pattern matching
+    user_input(&mut books);
+}
+
+// For Exercise 4.3: Enums & Pattern Matching
+// A provided function handling command line input for interaction with the program.
+// Takes a mutable Vector of Book as a parameter.
+// Uses LibraryAction enum and handle_action function from Exercise 4 to execute functionality.
+pub fn user_input(books: &mut Vec<Book>) {
+    let mut is_first_interaction = true;
+
+    loop {
+        if !is_first_interaction {
+            println!("Press Enter to continue.:");
+            io::stdin().read_line(&mut String::new()).expect("Failed to read input");
+        } else {
+            is_first_interaction = false;
+        }
+
+        println!("Enter your selection:");
+        println!("1) Add a Book");
+        println!("2) Take a Book");
+        println!("3) List all Books");
+        println!("0) Quit");
+
+        let mut user_input = String::new();
+        io::stdin().read_line(&mut user_input).expect("Failed to read input");
+        let user_input = user_input.trim();
+
+        let action = match user_input {
+            "0" => break,
+            "1" => {
+                println!("Enter Book details (title, author, ISBN, year):");
+                let mut details = String::new();
+                io::stdin().read_line(&mut details).expect("Failed to read input");
+                let parts: Vec<&str> = details.trim().split(',').collect();
+                if parts.len() < 3 {
+                    println!("\nInvalid input! \"title, author, ISBN, year\" required.");
+                    continue;
+                }
+
+                let year = match parts.get(3) {
+                    Some(year_str) => match year_str.trim().parse::<u32>() {
+                        Ok(year) => Some(year),
+                        Err(_) => {
+                            println!("\nInvalid input! Year must be an integer.");
+                            continue;
+                        }
+                    },
+                    None => None,
+                };
+
+                LibraryAction::AddBook(
+                    parts[0].trim().to_string(),
+                    parts[1].trim().to_string(),
+                    parts[2].trim().to_string(),
+                    year,
+                )
+            }
+            "2" => {
+                println!("Enter ISBN of the book to take:");
+                let mut isbn = String::new();
+                io::stdin().read_line(&mut isbn).expect("Failed to read input");
+                LibraryAction::TakeBook(isbn.trim().to_string())
+            }
+            "3" => LibraryAction::ListBooks,
+            _ => {
+                println!("\nInvalid choice!");
+                continue;
+            }
+        };
+
+        handle_action(books, action);
+    }
 }
 
 // 1. Structs & Option Struct
@@ -38,7 +113,10 @@ struct Book {
     publication_year: Option<u32>,
 }
 
-// 2. Immutability & Everything non-nullable by default
+// 2. Immutability & Everything non-nullable by default TODO
+// Create an immutable vector of books. Try to modify it (use push function) and compile. What happens?
+// Then make it mutable and add the books from Task 1 to the collection.
+
 
 // 3. Ownership & Borrow Checker
 // 3.1 Write a function add_book, that takes ownership of a book and adds it to a borrowed book collection.
@@ -49,8 +127,8 @@ fn add_book(books: &mut Vec<Book>, book: Book) {
     books.push(book);
 }
 
-fn take_book(books: &mut Vec<Book>, isbn: String) -> Option<Book> {
-    let index = books.iter().position(|book| book.isbn == isbn);
+fn take_book(books: &mut Vec<Book>, isbn: &str) -> Option<Book> {
+    let index = books.iter().position(|book| &book.isbn == isbn); //maybe provide
     if let Some(idx) = index {
         let removed_book = books.remove(idx);
         Some(removed_book)
@@ -64,19 +142,37 @@ fn list_books(books: &Vec<Book>) {
 }
 
 // 4. Enums & Pattern Matching
-// Create an enum 'LibraryAction' with actions 'AddBook', 'TakeBook' and 'ListBooks'.
-// Use a match statement to handle each action in the library management system.
+// 4.1 Create an enum 'LibraryAction' with actions 'AddBook(String, String, String, Option<u32>)', 'TakeBook(String)' and 'ListBooks'.
+// 4.2 Create a function 'handle_action'.
+//     Use a match statement to handle each LibraryAction, calling the methods you wrote in Task 3.
+// 4.3 Uncomment the 'user_input' function and its call in main()
+//     The function 'user_input' sets a variable to an action the user chooses and calls the function 'handle_action' with the chosen action.
 enum LibraryAction {
-    AddBook(Book),
+    AddBook(String, String, String, Option<u32>),
     TakeBook(String),
     ListBooks,
 }
 
-fn handle_action(action: LibraryAction) {
+fn handle_action(books: &mut Vec<Book>, action: LibraryAction) {
     match action {
-        LibraryAction::AddBook(book) => add_book(book),
-        LibraryAction::RemoveBook(isbn) => remove_book(isbn),
-        LibraryAction::ListBooks => list_books(),
+        LibraryAction::AddBook(title, author, isbn, publication_year) => {
+            let title_clone = title.clone();
+            let book = Book {
+                title,
+                author,
+                isbn,
+                publication_year
+            };
+            add_book(books, book);
+            println!("Added Book: {}", title_clone);
+        },
+        LibraryAction::TakeBook(isbn) => {
+            let removed_book = take_book(books, isbn);
+            println!("Took Book: {:?}", removed_book);
+        },
+        LibraryAction::ListBooks => {
+            list_books(books);
+        },
     }
 }
 
@@ -100,11 +196,9 @@ fn search_book(books: &mut Vec<Book>, isbn: String) -> Result<&Book, Box<dyn Err
     books.iter().find(|&book| book.isbn == isbn).ok_or_else(|| "Book not found".into())
 }
 
-// Box
+// Box/Smart Pointer
 
-// (Smart Pointer)
-
-// (Generics=Traits)
+// Generics/Traits
 
 // (Macros)
 // Write a macro to log library actions, use it to log actions.
