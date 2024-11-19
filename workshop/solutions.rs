@@ -196,7 +196,10 @@ impl Library {
     }
 }
 
-// 3. Ownership TODO
+// 3. Ownership
+// 3.1 In the main function, add the two instances of Book implemented in task 1.2 to the Library.
+// 3.2 Try to print the books after adding them to the Library. What happens?
+//     -> Ownership of the Book instances has been moved to the book vector.
 
 // 4. Enums & Pattern Matching
 // 4.1 Create an enum 'LibraryAction' with actions 'AddBook(Title, Author, ISBN, Option<PublicationYear>)', 'TakeBook(ISBN)' and 'ListBooks'.
