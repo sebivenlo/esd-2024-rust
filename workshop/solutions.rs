@@ -26,7 +26,7 @@ impl_type!(Author, String); //Author is String
 impl_type!(ISBN, String); //ISBN is String
 impl_type!(PublicationYear, u16); //PublicationYear is u16
 
-// Provided implementation of 'len' for Title.
+// Provided implementation of 'len' function for Title.
 impl Title {
     pub fn len(&self) -> usize {
         self.0.len()
@@ -168,7 +168,7 @@ fn user_input(library: &mut Library) {
 
 // 1. Structs & Option Struct
 // 1.1 Create a 'Book' struct with fields for the title, author, ISBN and an optional publication year.
-//     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this file. TODO link
+//     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this File. TODO link
 //     Hint: If you look at the impl_type(name, type) macro calls, you can see the wrapped types of each of the provided types.
 // 1.2 Create instances of 'Book' in the main function and print their details.
 // 1.3 Create a 'Library' struct with a field 'books' of Type 'Vec<Book>'.
@@ -216,13 +216,6 @@ impl Library {
 // 3.1 In the main function, add the two instances of Book implemented in task 1.2 to the Library.
 // 3.2 Try to print the books after adding them to the Library. What happens?
 //     -> Ownership of the Book instances has been moved to the book vector.
-
-// 4. Enums & Pattern Matching
-// 4.1 Create an enum 'LibraryAction' with actions 'AddBook(Title, Author, ISBN, Option<PublicationYear>)', 'TakeBook(ISBN)' and 'ListBooks'.
-// 4.2 Create a function 'handle_action'.
-//     Use a match statement to handle each LibraryAction, calling the methods implemented in Task 3.
-// 4.3 Uncomment the 'user_input' function and its call in main()
-//     The function 'user_input' sets a variable to an action the user chooses via the CLI and calls the function 'handle_action' with the chosen action.
 
 // 4. Enums & Pattern Matching
 // In this task you will create an enum and a function to handle command line input... TODO
@@ -297,9 +290,10 @@ impl Library {
 
 // 6. Lifetimes & Borrow Checker
 // 6.1 Write a function, which takes two references to Book as parameters and returns a reference to the book with the longer title.
-// 6.2 Implement function 'lifetime_demo'
+// 6.2 Implement function 'lifetime_demo':
 //     1. Move a book out of the library into a new variable. Declare a variable that will store the book with the longer title later on.
-//     2. Open a new Scope and create a new instance of Book and compare it with the book taken out of the library before the scope. Print the Book with the longer title inside the scope.
+//     2. Open a new Scope and create a new instance of Book and compare it with the book taken out of the library before the scope.
+//        Print the Book with the longer title inside the scope.
 //     3. After the Scope, try to first print the book with the longer title and after that the book taken out of the library.
 //     4. Run the Program, what happens? TODO
 
