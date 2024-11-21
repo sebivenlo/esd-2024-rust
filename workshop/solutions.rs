@@ -37,7 +37,7 @@ pub fn main() {
     // From Exercise 1.4: Structs & Option Struct
     let mut library = Library { books: Vec::new() };
 
-    // From Exercise 1.1: Structs & Option Struct
+    // From Exercise 1.2: Structs & Option Struct
     let book1 = Book {
         title: Title::new("1984"),
         author: Author::new("George Orwell"),
@@ -71,8 +71,15 @@ pub fn main() {
         Err(e) => { println!("Error: {:?}", e); }
     }
 
-    // From Exercise 8.2: Smart Pointers
-    //take_multiple_books(&mut books, &vec![&ISBN::new("9780451524935"), &ISBN::new("9780060850524")]);
+    // From Exercise 8: Smart Pointers
+    let book1 = Book {
+        title: Title::new("1984"),
+        author: Author::new("George Orwell"),
+        isbn: ISBN::new("9780451524935"),
+        publication_year: Some(PublicationYear(1961)),
+    };
+    library.add_book(book1);
+    assign_multiple_owners_to_book(&mut library, &ISBN::new("9780451524935"));
 
     // From Exercise 4.3: Enums & Pattern matching
     user_input(&mut library);
@@ -298,8 +305,23 @@ impl Library {
 }
 
 // 8. Smart Pointers
-// 8.1 Box
-// 8.2 Rc
+// Write a function that first takes Ownership of a book of a borrowed Library and saves the book into a new variable.
+// Create a new vec 'owners'.
+// Create a loop in which you create some amount of owners of the book.
+// Print how many owners each owned book has.
+// Hint: Use the Smart Pointer 'Rc' to allow for multiple ownerships.
+
+fn assign_multiple_owners_to_book(library: &mut Library, isbn: &ISBN) {
+    let mut owners: Vec<Rc<Book>> = Vec::new();
+
+    let taken_book = Rc::new(library.take_book(isbn).unwrap()); //assume isbn is correct
+    let owner = Rc::clone(&taken_book);
+    for _ in 0..23 {
+        owners.push(owner.clone());
+    }
+
+    println!("{:?} has {:?} owners.", &taken_book, Rc::strong_count(&taken_book));
+}
 
 
 // (Macros)
