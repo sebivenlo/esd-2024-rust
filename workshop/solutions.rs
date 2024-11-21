@@ -87,7 +87,7 @@ pub fn main() {
 
 // For Exercise 4.3: Enums & Pattern Matching
 // A provided function handling command line input for interaction with the program.
-// Takes a mutable Vector of Book as a parameter.
+// Takes a mutable Library as a parameter.
 // Uses LibraryAction enum and handle_action function from Exercise 4 to execute functionality.
 fn user_input(library: &mut Library) {
     let mut is_first_interaction = true;
@@ -104,6 +104,8 @@ fn user_input(library: &mut Library) {
         println!("1) Add a Book");
         println!("2) Take a Book");
         println!("3) List all Books");
+        println!("4) Suggest a Book");
+        println!("5) Search a Book");
         println!("0) Quit");
 
         let mut user_input = String::new();
@@ -147,6 +149,13 @@ fn user_input(library: &mut Library) {
                 LibraryAction::TakeBook(ISBN::new(isbn.trim()))
             }
             "3" => LibraryAction::ListBooks,
+            "4" => LibraryAction::SuggestBook,
+            "5" => {
+                println!("Enter ISBN of the book to search:");
+                let mut isbn = String::new();
+                io::stdin().read_line(&mut isbn).expect("Failed to read input");
+                LibraryAction::SearchBook(ISBN::new(isbn.trim()))
+            },
             _ => {
                 println!("\nInvalid choice!");
                 continue;
@@ -159,7 +168,7 @@ fn user_input(library: &mut Library) {
 
 // 1. Structs & Option Struct
 // 1.1 Create a 'Book' struct with fields for the title, author, ISBN and an optional publication year.
-//     To achieve better type safety through enforcing stricter type checks, use the provided Types Title, Author, ISBN and PublicationYear defined at the beginning of the file.
+//     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this file. TODO link
 //     Hint: If you look at the impl_type(name, type) macro calls, you can see the wrapped types of each of the provided types.
 // 1.2 Create instances of 'Book' in the main function and print their details.
 // 1.3 Create a 'Library' struct with a field 'books' of Type 'Vec<Book>'.
@@ -215,16 +224,31 @@ impl Library {
 // 4.3 Uncomment the 'user_input' function and its call in main()
 //     The function 'user_input' sets a variable to an action the user chooses via the CLI and calls the function 'handle_action' with the chosen action.
 
+// 4. Enums & Pattern Matching
+// In this task you will create an enum and a function to handle command line input... TODO
+// 4.1 Create an enum 'LibraryAction' with actions:
+//     'AddBook(Title, Author, ISBN, Option<PublicationYear>)', 'TakeBook(ISBN)', 'ListBooks', 'SuggestBook' and 'SearchBook(ISBN)'.
+// 4.2 Create a function 'handle_action' and implement AddBook, TakeBook and SearchBook.
+//     Use a match statement to handle each LibraryAction, calling the methods implemented in Task 3.
+//     For SuggestBook and SearchBook, implement println!("Not implemented yet.").
+//     After adding and taking a book, print the Book, to give feedback to the CLI.
+// 4.3 Uncomment the 'user_input' function and its call in main()
+//     The function 'user_input' sets a variable to an action the user chooses via the CLI and calls the function 'handle_action' with the chosen action.
+
 enum LibraryAction {
     AddBook(Title, Author, ISBN, Option<PublicationYear>),
     TakeBook(ISBN),
     ListBooks,
+    // From Exercise 5: Crates
+    SuggestBook,
+    // From Exercise 7: Error Handling
+    SearchBook(ISBN),
 }
 
 fn handle_action(library: &mut Library, action: LibraryAction) {
     match action {
         LibraryAction::AddBook(title, author, isbn, publication_year) => {
-            let title_clone = title.clone();
+            let title_clone = title.clone(); //TODO add to task description, also add println...
             let book = Book {
                 title,
                 author,
@@ -241,13 +265,25 @@ fn handle_action(library: &mut Library, action: LibraryAction) {
         LibraryAction::ListBooks => {
             library.list_books();
         },
+        // From Exercise 5: Crates
+        LibraryAction::SuggestBook => {
+            library.suggest_book();
+        },
+        // From Exercise 7.2: Error Handling
+        LibraryAction::SearchBook(isbn) => {
+            match library.search_book(&isbn) {
+                Ok(book) => { println!("Found book: {:?}", book); }
+                Err(e) => { println!("Error: {:?}", e); }
+            }
+        },
     }
 }
 
 // 5. Crates
 // 5.1 Add to dependencies in Cargo.toml: rand = "0.8.5"
-//     and import rand::seq::SliceRandom
-// 5.2 Implement a function 'suggest_book' in Library, that chooses a random book using 'books.choose(&mut rand::thread_rng())' and prints the result.
+//     In this file, import: rand::seq::SliceRandom
+// 5.2 Implement a function 'suggest_book' for the Library struct,
+//     that chooses a random book using 'books.choose(&mut rand::thread_rng())' and prints the result.
 
 impl Library {
     fn suggest_book(&self) {
