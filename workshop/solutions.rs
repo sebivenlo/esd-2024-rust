@@ -50,26 +50,26 @@ pub fn main() {
         isbn: ISBN::new("9780060850524"),
         publication_year: Some(PublicationYear(2006)),
     };
+    let book3 = Book {
+        title: Title::new("Book3"),
+        author: Author::new("Author3"),
+        isbn: ISBN::new("9876543210987"),
+        publication_year: None,
+    };
     //println!("{:?}", book1);
     //println!("{:?}", book2);
+    //println!("{:?}", book3);
 
     // From Exercise 3: Ownership
     library.add_book(book1);
     library.add_book(book2);
+    library.add_book(book3);
     //println!("{:?}", book1);
     //println!("{:?}", book2);
-
-    // From Exercise 5.3: Crates TODO
-    library.suggest_book();
+    //println!("{:?}", book3);
 
     // From Exercise 6: Lifetimes & Borrow Checker
     lifetime_demo(&mut library);
-
-    // From Exercise 7.2: Error Handling
-    match library.search_book(&ISBN::new("9780060850524")) {
-        Ok(book) => { println!("Found book: {:?}", book); }
-        Err(e) => { println!("Error: {:?}", e); }
-    }
 
     // From Exercise 8: Smart Pointers
     let book1 = Book {
@@ -168,7 +168,7 @@ fn user_input(library: &mut Library) {
 
 // 1. Structs & Option Struct
 // 1.1 Create a 'Book' struct with fields for the title, author, ISBN and an optional publication year.
-//     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this File. TODO link
+//     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this File.
 //     Hint: If you look at the impl_type(name, type) macro calls, you can see the wrapped types of each of the provided types.
 // 1.2 Create instances of 'Book' in the main function and print their details.
 // 1.3 Create a 'Library' struct with a field 'books' of Type 'Vec<Book>'.
@@ -187,10 +187,11 @@ struct Library {
 }
 
 // 2. Adding functions to a struct
-// 2.1 Implement a function 'add_book' in Library, that takes ownership of a book and adds it to the book collection.
-// 2.2 Implement a function 'take_book' in Library, with which you can take a book out of the book collection by its ISBN.
-//     The function takes ownership of a book from the collection and returns it.
-// 2.3 Implement a function 'list_books' in Library, that prints the book collection.
+// 2.1 Implement a function 'add_book' for the Library struct, that takes ownership of a book and adds it to the book collection.
+// 2.2 Implement a function 'take_book' for the Library struct, with which you can take a book out of the book collection by its ISBN.
+//     The function takes ownership of a book from the collection and returns it or 'None', depending on if the book is found.
+//     Hint: use 'self.books.iter().position(|book| &book.isbn == isbn)' to get the index of the searched book.
+// 2.3 Implement a function 'get_books' for the Library struct, that returns an immutable book collection from the Library.
 
 impl Library {
     fn add_book(&mut self, book: Book) {
@@ -198,7 +199,7 @@ impl Library {
     }
 
     fn take_book(&mut self, isbn: &ISBN) -> Option<Book> {
-        let index = self.books.iter().position(|book| &book.isbn == isbn); //maybe provide
+        let index = self.books.iter().position(|book| &book.isbn == isbn);
         if let Some(idx) = index {
             let removed_book = self.books.remove(idx);
             Some(removed_book)
@@ -207,8 +208,8 @@ impl Library {
         }
     }
 
-    fn list_books(&self) {
-        println!("Books: {:?}", self.books);
+    fn get_books(&self) -> &Vec<Book> {
+        &self.books
     }
 }
 
@@ -218,13 +219,19 @@ impl Library {
 //     -> Ownership of the Book instances has been moved to the book vector.
 
 // 4. Enums & Pattern Matching
-// In this task you will create an enum and a function to handle command line input... TODO
+// In this task you will create an enum and a function to handle some of the command line functionality.
+// User input itself is handled and provided in the 'user_input' function, which calls a function 'handle_action'.
 // 4.1 Create an enum 'LibraryAction' with actions:
-//     'AddBook(Title, Author, ISBN, Option<PublicationYear>)', 'TakeBook(ISBN)', 'ListBooks', 'SuggestBook' and 'SearchBook(ISBN)'.
-// 4.2 Create a function 'handle_action' and implement AddBook, TakeBook and SearchBook.
-//     Use a match statement to handle each LibraryAction, calling the methods implemented in Task 3.
-//     For SuggestBook and SearchBook, implement println!("Not implemented yet.").
-//     After adding and taking a book, print the Book, to give feedback to the CLI.
+//     'AddBook(Title, Author, ISBN, Option<PublicationYear>)',
+//     'TakeBook(ISBN)',
+//     'ListBooks',
+//     'SuggestBook',
+//     'SearchBook(ISBN)'.
+// 4.2 Create a function 'handle_action' and implement the actions 'AddBook', 'TakeBook' and 'SearchBook'.
+//     Use a match statement to handle each LibraryAction and call the methods implemented in Task 3.
+//     After each action, to give feedback to the CLI, print what action has been done, as well as the book/books.
+//     Hint: Also print the book AFTER moving ownership to the book collection. Title/String is a Clone Type.
+//     For SuggestBook and SearchBook, uncomment the code and add the enum actions.
 // 4.3 Uncomment the 'user_input' function and its call in main()
 //     The function 'user_input' sets a variable to an action the user chooses via the CLI and calls the function 'handle_action' with the chosen action.
 
@@ -256,11 +263,17 @@ fn handle_action(library: &mut Library, action: LibraryAction) {
             println!("Took Book: {:?}", removed_book);
         },
         LibraryAction::ListBooks => {
-            library.list_books();
+            let books = library.get_books();
+            println!("Books: {:?}", books);
         },
         // From Exercise 5: Crates
         LibraryAction::SuggestBook => {
-            library.suggest_book();
+            let suggested_book = library.suggest_book();
+            if let Some(suggested_book) = suggested_book {
+                println!("Suggested Book: {:?}", suggested_book);
+            } else {
+                println!("No books available to suggest.");
+            }
         },
         // From Exercise 7.2: Error Handling
         LibraryAction::SearchBook(isbn) => {
@@ -276,16 +289,14 @@ fn handle_action(library: &mut Library, action: LibraryAction) {
 // 5.1 Add to dependencies in Cargo.toml: rand = "0.8.5"
 //     In this file, import: rand::seq::SliceRandom
 // 5.2 Implement a function 'suggest_book' for the Library struct,
-//     that chooses a random book and prints the result.
-//     Hint: use books.choose(&mut rand::thread_rng())
+//     that chooses a random book and returns a reference to it.
+//     Hint: use the function 'choose(&mut rand::thread_rng())', now provided by the rand crate on the books.
+// 5.3 Implement the SuggestBook action in 'handle_action', printing either the suggested book to the CLI,
+//     or if the Library is empty, that there are no books available to suggest.
 
 impl Library {
-    fn suggest_book(&self) {
-        if let Some(book) = self.books.choose(&mut rand::thread_rng()) {
-            println!("Suggested Book: {:?}", book);
-        } else {
-            println!("No books available to suggest.");
-        }
+    fn suggest_book(&self) -> Option<&Book> {
+        self.books.choose(&mut rand::thread_rng())
     }
 }
 
@@ -324,10 +335,12 @@ fn lifetime_demo(library: &mut Library) {
 }
 
 // 7. Error Handling
-// 7.1 Implement a function in Library, that searches for a book by its ISBN,
+// 7.1 Implement a function in Library, that searches for a book by its ISBN (Use a reference for good practice),
 //     but doesn't take ownership of the book, leaving it in the Library.
-//     Return a Result of a Book or an error message, depending on if the book was found.
-// 7.2 Call the function and use pattern matching to handle the possible return values.
+//     Return a Result with a Book or an error message, depending on if the book was found.
+// 7.2 Implement the SearchBook action in 'handle_action'.
+//     Use pattern matching to handle the possible return values.
+//     Print the result.
 
 impl Library {
     fn search_book(&self, isbn: &ISBN) -> Result<&Book, &'static str> {
@@ -337,11 +350,12 @@ impl Library {
 }
 
 // 8. Smart Pointers
-// Write a function that first takes Ownership of a book of a borrowed Library and saves the book into a new variable.
-// Create a new vec 'owners'.
-// Create a loop in which you create some amount of owners of the book.
-// Print how many owners each owned book has.
-// Hint: Use the Smart Pointer 'Rc' to allow for multiple ownerships.
+// In this Task, you will create a function, in which multiple Ownership of a book is taken using the Smart Pointer Rc.
+// Write a function that borrows a Library and an ISBN.
+// - Inside the function, create a new vec 'owners' which takes the type 'Rc<Book>' and initialize it.
+// - Take ownership of a book inside the Library by the borrowed ISBN.
+// - Create a loop in which you create some amount of owners of the book using Rc and push the owners to the vector.
+// - Print how many owners each owned book has.
 
 fn assign_multiple_owners_to_book(library: &mut Library, isbn: &ISBN) {
     let mut owners: Vec<Rc<Book>> = Vec::new();
