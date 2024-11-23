@@ -276,7 +276,8 @@ fn handle_action(library: &mut Library, action: LibraryAction) {
 // 5.1 Add to dependencies in Cargo.toml: rand = "0.8.5"
 //     In this file, import: rand::seq::SliceRandom
 // 5.2 Implement a function 'suggest_book' for the Library struct,
-//     that chooses a random book using 'books.choose(&mut rand::thread_rng())' and prints the result.
+//     that chooses a random book and prints the result.
+//     Hint: use books.choose(&mut rand::thread_rng())
 
 impl Library {
     fn suggest_book(&self) {
@@ -323,9 +324,10 @@ fn lifetime_demo(library: &mut Library) {
 }
 
 // 7. Error Handling
-// 7.1 Implement a function in Library, that searches for a book by its isbn, but doesn't take ownership of it.
+// 7.1 Implement a function in Library, that searches for a book by its ISBN,
+//     but doesn't take ownership of the book, leaving it in the Library.
 //     Return a Result of a Book or an error message, depending on if the book was found.
-// 7.2 Call the function and use pattern matching to handle the possible results.
+// 7.2 Call the function and use pattern matching to handle the possible return values.
 
 impl Library {
     fn search_book(&self, isbn: &ISBN) -> Result<&Book, &'static str> {
