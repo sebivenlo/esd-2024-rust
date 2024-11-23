@@ -1,8 +1,8 @@
 // Library Management System Exercises Solutions
 
+use rand::seq::SliceRandom;
 use std::io;
 use std::rc::Rc;
-use rand::seq::SliceRandom;
 
 // Provided macro for creating custom types.
 // - Defines a struct with the name of the custom type ($name), encapsulating another type ($ty).
@@ -95,7 +95,9 @@ fn user_input(library: &mut Library) {
     loop {
         if !is_first_interaction {
             println!("Press Enter to continue.:");
-            io::stdin().read_line(&mut String::new()).expect("Failed to read input");
+            io::stdin()
+                .read_line(&mut String::new())
+                .expect("Failed to read input");
         } else {
             is_first_interaction = false;
         }
@@ -109,7 +111,9 @@ fn user_input(library: &mut Library) {
         println!("0) Quit");
 
         let mut user_input = String::new();
-        io::stdin().read_line(&mut user_input).expect("Failed to read input");
+        io::stdin()
+            .read_line(&mut user_input)
+            .expect("Failed to read input");
         let user_input = user_input.trim();
 
         let action = match user_input {
@@ -117,7 +121,9 @@ fn user_input(library: &mut Library) {
             "1" => {
                 println!("Enter Book details (title, author, ISBN, year):");
                 let mut details = String::new();
-                io::stdin().read_line(&mut details).expect("Failed to read input");
+                io::stdin()
+                    .read_line(&mut details)
+                    .expect("Failed to read input");
                 let parts: Vec<&str> = details.trim().split(',').collect();
                 if parts.len() < 3 {
                     println!("\nInvalid input! \"title, author, ISBN, year\" required.");
@@ -145,7 +151,9 @@ fn user_input(library: &mut Library) {
             "2" => {
                 println!("Enter ISBN of the book to take:");
                 let mut isbn = String::new();
-                io::stdin().read_line(&mut isbn).expect("Failed to read input");
+                io::stdin()
+                    .read_line(&mut isbn)
+                    .expect("Failed to read input");
                 LibraryAction::TakeBook(ISBN::new(isbn.trim()))
             }
             "3" => LibraryAction::ListBooks,
@@ -153,9 +161,11 @@ fn user_input(library: &mut Library) {
             "5" => {
                 println!("Enter ISBN of the book to search:");
                 let mut isbn = String::new();
-                io::stdin().read_line(&mut isbn).expect("Failed to read input");
+                io::stdin()
+                    .read_line(&mut isbn)
+                    .expect("Failed to read input");
                 LibraryAction::SearchBook(ISBN::new(isbn.trim()))
-            },
+            }
             _ => {
                 println!("\nInvalid choice!");
                 continue;
@@ -169,8 +179,11 @@ fn user_input(library: &mut Library) {
 // 1. Structs & Option Struct
 // 1.1 Create a 'Book' struct with fields for the title, author, ISBN and an optional publication year.
 //     To achieve better type safety through enforcing stricter type checks, use the provided Types 'Title', 'Author', 'ISBN' and 'PublicationYear' defined in this File.
-//     Hint: If you look at the impl_type(name, type) macro calls, you can see the wrapped types of each of the provided types.
+//     Hint: If you look at the impl_type(name, type) macro calls (Line 23+), you can see the wrapped types of each of the provided types.
 // 1.2 Create instances of 'Book' in the main function and print their details.
+//     To initialize the provided types, use the formats:
+//     - Title::new("1984") or Title(String::from("1984"))
+//     - For PublicationYear use PublicationYear::new(2001_u16) or PublicationYear(2001)
 // 1.3 Create a 'Library' struct with a field 'books' of Type 'Vec<Book>'.
 // 1.4 Initialize the Library struct and assign it to a variable in the main function.
 
@@ -248,24 +261,24 @@ enum LibraryAction {
 fn handle_action(library: &mut Library, action: LibraryAction) {
     match action {
         LibraryAction::AddBook(title, author, isbn, publication_year) => {
-            let title_clone = title.clone(); //TODO add to task description, also add println...
+            let title_clone = title.clone();
             let book = Book {
                 title,
                 author,
                 isbn,
-                publication_year
+                publication_year,
             };
             library.add_book(book);
             println!("Added Book: {:?}", title_clone);
-        },
+        }
         LibraryAction::TakeBook(isbn) => {
             let removed_book = library.take_book(&isbn);
             println!("Took Book: {:?}", removed_book);
-        },
+        }
         LibraryAction::ListBooks => {
             let books = library.get_books();
             println!("Books: {:?}", books);
-        },
+        }
         // From Exercise 5: Crates
         LibraryAction::SuggestBook => {
             let suggested_book = library.suggest_book();
@@ -274,12 +287,14 @@ fn handle_action(library: &mut Library, action: LibraryAction) {
             } else {
                 println!("No books available to suggest.");
             }
-        },
+        }
         // From Exercise 7.2: Error Handling
-        LibraryAction::SearchBook(isbn) => {
-            match library.search_book(&isbn) {
-                Ok(book) => { println!("Found book: {:?}", book); }
-                Err(e) => { println!("Error: {:?}", e); }
+        LibraryAction::SearchBook(isbn) => match library.search_book(&isbn) {
+            Ok(book) => {
+                println!("Found book: {:?}", book);
+            }
+            Err(e) => {
+                println!("Error: {:?}", e);
             }
         },
     }
@@ -307,7 +322,7 @@ impl Library {
 //     2. Open a new Scope and create a new instance of Book and compare it with the book taken out of the library before the scope.
 //        Print the Book with the longer title inside the scope.
 //     3. After the Scope, try to first print the book with the longer title and after that the book taken out of the library.
-//     4. Run the Program, what happens? TODO
+//     4. Run the Program, what happens?
 
 fn longest_title<'a>(x: &'a Book, y: &'a Book) -> &'a Book {
     if x.title.len() > y.title.len() {
@@ -325,7 +340,7 @@ fn lifetime_demo(library: &mut Library) {
             title: Title::new("Book3"),
             author: Author::new("Author3"),
             isbn: ISBN::new("ISB3"),
-            publication_year: Some(PublicationYear(3333))
+            publication_year: Some(PublicationYear(3333)),
         };
         longest_title_book = longest_title(&taken_book, &book3);
         println!("Book with longer title: {:?}", longest_title_book);
@@ -345,7 +360,10 @@ fn lifetime_demo(library: &mut Library) {
 impl Library {
     fn search_book(&self, isbn: &ISBN) -> Result<&Book, &'static str> {
         //panic!("The Library burned down");
-        self.books.iter().find(|&book| &book.isbn == isbn).ok_or("Book not found")
+        self.books
+            .iter()
+            .find(|&book| &book.isbn == isbn)
+            .ok_or("Book not found")
     }
 }
 
@@ -366,9 +384,12 @@ fn assign_multiple_owners_to_book(library: &mut Library, isbn: &ISBN) {
         owners.push(owner.clone());
     }
 
-    println!("{:?} has {:?} owners.", &taken_book, Rc::strong_count(&taken_book));
+    println!(
+        "{:?} has {:?} owners.",
+        &taken_book,
+        Rc::strong_count(&taken_book)
+    );
 }
-
 
 // (Macros)
 // Write a macro to log library actions, use it to log actions.
